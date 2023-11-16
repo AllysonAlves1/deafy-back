@@ -1,26 +1,53 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAudioDto } from './dto/create-audio.dto';
 import { UpdateAudioDto } from './dto/update-audio.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AudiosService {
-  create(createAudioDto: CreateAudioDto) {
-    return 'This action adds a new audio';
+  constructor(private prisma: PrismaService) {}
+  async createAudio(
+    createAudioDto: CreateAudioDto & { file: Express.Multer.File },
+  ) {
+    const userExist =
+      (await this.prisma.users.count({
+        where: { id: createAudioDto.authorId },
+      })) !== 0;
+
+    if (!userExist) {
+      throw new Error('User not found');
+    }
+
+    return await this.prisma.audios.create({
+      data: {
+        audio: createAudioDto.file.path,
+        title: createAudioDto.title,
+        subtitle: createAudioDto.subtitle,
+        authorId: createAudioDto.authorId,
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all audios`;
+  async findAll() {
+    return await this.prisma.audios.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} audio`;
+  async findOne(id: number) {
+    return await this.prisma.audios.findUnique({
+      where: { id },
+    });
   }
 
-  update(id: number, updateAudioDto: UpdateAudioDto) {
-    return `This action updates a #${id} audio`;
+  async update(id: number, updateAudioDto: UpdateAudioDto) {
+    return await this.prisma.audios.update({
+      where: { id },
+      data: updateAudioDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} audio`;
+  async remove(id: number) {
+    return await this.prisma.audios.delete({
+      where: { id },
+    });
   }
 }
