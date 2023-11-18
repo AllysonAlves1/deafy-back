@@ -17,8 +17,8 @@ import {
 } from './dto/create-audio.dto';
 import { UpdateAudioDto } from './dto/update-audio.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AudioFileValidator } from './audio-file-validator';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { AudioFileValidator } from './audio-file-validator';
 
 @Controller('audios')
 export class AudiosController {
@@ -28,15 +28,15 @@ export class AudiosController {
   @ApiBody({
     type: CreateAudioWithUploadDto,
   })
-  @UseInterceptors(FileInterceptor('file'))
   @Post()
+  @UseInterceptors(FileInterceptor('file'))
   create(
     @Body() createAudioDto: CreateAudioDto,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
           new AudioFileValidator({
-            maxSize: 1024 * 1024 * 10,
+            maxSize: 1024 * 1024 * 100,
             mimeType: 'audio/mpeg',
           }),
         ],
@@ -45,7 +45,6 @@ export class AudiosController {
     )
     file: Express.Multer.File,
   ) {
-    console.log(file);
     return this.audiosService.createAudio({ ...createAudioDto, file });
   }
 

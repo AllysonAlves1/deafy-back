@@ -35,6 +35,12 @@ $ npm install
 ## Running the app
 
 ```bash
+# Docker
+$ docker compose up -d
+
+# Prisma
+$ npx prisma migrate dev
+
 # development
 $ npm run start
 
@@ -44,6 +50,10 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
+
+## URL
+[Swagger]: http://localhost:3000/api
+
 
 ## Test
 

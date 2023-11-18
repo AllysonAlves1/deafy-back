@@ -3,7 +3,6 @@ import { IFile } from '@nestjs/common/pipes/file/interfaces';
 
 export class AudioFileValidator extends FileValidator {
   isValid(file?: IFile): boolean | Promise<boolean> {
-    console.log(file, this.validationOptions);
     return (
       file.mimetype === this.validationOptions.mimeType &&
       file.size < this.validationOptions.maxSize

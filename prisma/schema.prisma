@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -22,30 +22,27 @@ model Users {
   password String
   image    String?
   role     Role     @default(USER)
-  posts    Posts[]
   audios   Audios[]
 }
-
-model Posts {
-  id       Int     @id @default(autoincrement())
-  title    String
-  subtitle String?
-  image    String?
-  audio    String
-  author   Users?  @relation(fields: [authorId], references: [id])
-  authorId Int?
-}
-
 model Audios {
   id       Int     @id @default(autoincrement())
   title    String?
   subtitle String?
-  audio    String
-  author   Users?  @relation(fields: [authorId], references: [id])
-  authorId Int?
+  image    String?
+  category Category @default(AUDIO)
+  file_path    String
+  author   Users @relation(fields: [authorId], references: [id])
+  authorId Int
 }
 
 enum Role {
   USER
   ADMIN
+}
+
+enum Category {
+  AUDIO
+  MUSIC
+  PODCAST
+  AUDIOBOOK
 }
