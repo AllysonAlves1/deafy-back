@@ -1,12 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Category } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { IsInt } from 'class-validator';
 
 export class CreateAudioDto {
   @ApiProperty()
   title: string;
-  @ApiProperty()
+  @ApiProperty({ required: false })
   subtitle: string;
+  @ApiProperty({ required: false, enum: ['MUSIC', 'PODCAST', 'AUDIOBOOK'] })
+  category: Category;
   @IsInt()
   @Type(() => Number)
   @ApiProperty()
@@ -15,5 +18,8 @@ export class CreateAudioDto {
 
 export class CreateAudioWithUploadDto extends CreateAudioDto {
   @ApiProperty({ type: 'string', format: 'binary' })
-  file: string;
+  audio: string;
+
+  @ApiProperty({ required: false, type: 'string', format: 'binary' })
+  image: string;
 }

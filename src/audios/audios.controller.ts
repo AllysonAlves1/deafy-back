@@ -9,6 +9,7 @@ import {
   UploadedFile,
   ParseFilePipe,
   UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { AudiosService } from './audios.service';
 import {
@@ -16,9 +17,14 @@ import {
   CreateAudioWithUploadDto,
 } from './dto/create-audio.dto';
 import { UpdateAudioDto } from './dto/update-audio.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { AudioFileValidator } from './audio-file-validator';
+import { Category } from '@prisma/client';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @Controller('audios')
 export class AudiosController {
@@ -29,8 +35,28 @@ export class AudiosController {
     type: CreateAudioWithUploadDto,
   })
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
-  create(
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'audio', maxCount: 1 },
+      { name: 'image', maxCount: 1 },
+    ]),
+  )
+  createAudio(
+    @Body() createAudioDto: CreateAudioDto,
+    @UploadedFiles()
+    files: { audio: Express.Multer.File; image: Express.Multer.File },
+  ) {
+    console.log(files);
+    return this.audiosService.createAudio({ ...createAudioDto, files });
+  }
+
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: CreateAudioWithUploadDto,
+  })
+  @Post('posts')
+  @UseInterceptors(FileInterceptor('audio'))
+  createPost(
     @Body() createAudioDto: CreateAudioDto,
     @UploadedFile(
       new ParseFilePipe({
@@ -45,17 +71,14 @@ export class AudiosController {
     )
     file: Express.Multer.File,
   ) {
-    return this.audiosService.createAudio({ ...createAudioDto, file });
+    return this.audiosService.createPost({ ...createAudioDto, file });
   }
 
-  @Get()
-  findAll() {
-    return this.audiosService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.audiosService.findOne(+id);
+  @UseInterceptors(CacheInterceptor)
+  @Get(':category')
+  findAll(@Param('category') category: Category) {
+    // console.log('chamou o cache');
+    return this.audiosService.findAll(category);
   }
 
   @Patch(':id')

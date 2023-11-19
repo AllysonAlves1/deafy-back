@@ -21,3 +21,4 @@ export class AudioFileValidator extends FileValidator {
     }
   }
 }
+export { FileValidator };

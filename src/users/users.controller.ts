@@ -10,14 +10,27 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { HashPasswordPipe } from '../pipes/hash-password.pipe';
+import { ListUserDTO } from './dto/list-user.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.createUser(createUserDto);
+  async createUser(
+    @Body() { password, ...createUserDto }: CreateUserDto,
+    @Body('password', HashPasswordPipe) passwordHash: string,
+  ) {
+    const userCreate = await this.usersService.createUser({
+      ...createUserDto,
+      password: passwordHash,
+    });
+
+    return {
+      message: 'Usuário criado com sucesso!',
+      usuario: new ListUserDTO(userCreate.id, userCreate.name),
+    };
   }
 
   @Get()
