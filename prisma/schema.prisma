@@ -29,8 +29,8 @@ model Audios {
   title    String?
   subtitle String?
   image    String?
+  audio    String
   category Category @default(AUDIO)
-  file_path    String
   author   Users @relation(fields: [authorId], references: [id])
   authorId Int
 }

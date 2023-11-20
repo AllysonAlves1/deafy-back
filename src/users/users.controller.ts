@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -29,10 +30,10 @@ export class UsersController {
 
     return {
       message: 'Usuário criado com sucesso!',
-      usuario: new ListUserDTO(userCreate.id, userCreate.name),
+      usuario: new ListUserDTO(userCreate.id, userCreate.name, userCreate.email),
     };
   }
-
+  
   @Get()
   findAll() {
     return this.usersService.findAll();

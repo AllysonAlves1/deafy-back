@@ -14,8 +14,13 @@ export class UsersService {
   }
 
   async findAll() {
+    // Quando retorna os usuários não retorna a senha
     return await this.prisma.users.findMany({
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
         audios: true,
       },
     });
@@ -24,6 +29,12 @@ export class UsersService {
   async findOne(id: number) {
     return await this.prisma.users.findUniqueOrThrow({
       where: { id },
+    });
+  }
+
+  async findByEmail(email: string) {
+    return await this.prisma.users.findUnique({
+      where: { email },
     });
   }
 

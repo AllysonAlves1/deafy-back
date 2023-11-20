@@ -9,13 +9,14 @@ import { Category } from '@prisma/client';
 export class AudiosService {
   constructor(private prisma: PrismaService) {}
   async createAudio(
+    id,
     createAudioDto: CreateAudioDto & {
       files: { audio: Express.Multer.File; image: Express.Multer.File };
     },
   ) {
     const userExist =
       (await this.prisma.users.count({
-        where: { id: createAudioDto.authorId },
+        where: { id },
       })) !== 0;
 
     if (!userExist) {
@@ -24,20 +25,21 @@ export class AudiosService {
 
     return await this.prisma.audios.create({
       data: {
+        authorId: id,
         title: createAudioDto.title,
-        authorId: createAudioDto.authorId,
-        file_path: createAudioDto.files.audio[0].path,
+        audio: createAudioDto.files.audio[0].path,
         image: createAudioDto.files.image[0].path,
       },
     });
   }
 
   async createPost(
+    id,
     createAudioDto: CreateAudioDto & { file: Express.Multer.File },
   ) {
     const userExist =
       (await this.prisma.users.count({
-        where: { id: createAudioDto.authorId, role: 'ADMIN' },
+        where: { id, role: 'ADMIN' },
       })) !== 0;
 
     if (!userExist) {
@@ -46,10 +48,10 @@ export class AudiosService {
 
     return await this.prisma.audios.create({
       data: {
+        authorId: id,
         title: createAudioDto.title,
         category: createAudioDto.category,
-        authorId: createAudioDto.authorId,
-        file_path: createAudioDto.file.path,
+        audio: createAudioDto.file.path,
       },
     });
   }

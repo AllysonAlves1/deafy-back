@@ -3,6 +3,7 @@ import { UsersModule } from './users/users.module';
 import { AudiosModule } from './audios/audios.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -13,8 +14,8 @@ import { CacheModule } from '@nestjs/cache-manager';
       isGlobal: true,
       ttl: 10000,
     }),
+    AuthModule,
   ],
-  controllers: [],
   providers: [],
 })
 export class AppModule {}
