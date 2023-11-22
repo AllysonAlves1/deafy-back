@@ -13,7 +13,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { HashPasswordPipe } from '../pipes/hash-password.pipe';
 import { ListUserDTO } from './dto/list-user.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -30,10 +32,14 @@ export class UsersController {
 
     return {
       message: 'Usuário criado com sucesso!',
-      usuario: new ListUserDTO(userCreate.id, userCreate.name, userCreate.email),
+      usuario: new ListUserDTO(
+        userCreate.id,
+        userCreate.name,
+        userCreate.email,
+      ),
     };
   }
-  
+
   @Get()
   findAll() {
     return this.usersService.findAll();

@@ -23,12 +23,14 @@ import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { AudioFileValidator } from './audio-file-validator';
 import { Category } from '@prisma/client';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { AuthGuard } from '../auth/auth.guard';
 
+@ApiTags('Audios')
+@ApiBearerAuth()
 @UseGuards(AuthGuard)
 @Controller('audios')
 export class AudiosController {
