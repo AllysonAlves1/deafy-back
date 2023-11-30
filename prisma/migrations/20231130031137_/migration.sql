@@ -17,8 +17,8 @@ CREATE TABLE `Audios` (
     `title` VARCHAR(191) NULL,
     `subtitle` VARCHAR(191) NULL,
     `image` VARCHAR(191) NULL,
+    `audio` VARCHAR(191) NOT NULL,
     `category` ENUM('AUDIO', 'MUSIC', 'PODCAST', 'AUDIOBOOK') NOT NULL DEFAULT 'AUDIO',
-    `file_path` VARCHAR(191) NOT NULL,
     `authorId` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)

@@ -19,7 +19,7 @@ export class AuthService {
 
     const userAuth = await bcrypt.compare(authDto.password, user.password);
 
-    if(!userAuth) {
+    if (!userAuth) {
       throw new UnauthorizedException('O email ou senha estão incorretos');
     }
 
@@ -28,6 +28,5 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
     };
-
   }
 }
