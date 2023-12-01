@@ -23,7 +23,7 @@ import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AudioFileValidator } from './audio-file-validator';
 import { Category } from '@prisma/client';
 import { CacheInterceptor } from '@nestjs/cache-manager';
@@ -40,7 +40,7 @@ export class AudiosController {
   @ApiBody({
     type: CreateAudioWithUploadDto,
   })
-  @Post()
+  @Post('posts/upload')
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'audio', maxCount: 1 },
@@ -55,14 +55,14 @@ export class AudiosController {
   ) {
     console.log(files);
     const id = req.user.sub;
-    return this.audiosService.createAudio(+id, { ...createAudioDto, files });
+    return this.audiosService.createPost(+id, { ...createAudioDto, files });
   }
 
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     type: CreateAudioWithUploadDto,
   })
-  @Post('posts')
+  @Post('upload')
   @UseInterceptors(FileInterceptor('audio'))
   createPost(
     @Req() req,
@@ -81,17 +81,24 @@ export class AudiosController {
     file: Express.Multer.File,
   ) {
     const id = req.user.sub;
-    return this.audiosService.createPost(+id, { ...createAudioDto, file });
+    return this.audiosService.createAudio(+id, { ...createAudioDto, file });
   }
 
   @UseInterceptors(CacheInterceptor)
   @Get(':category')
-  findAll(
+  findAllCategory(
     // @Req() req,
-    @Param('category') category: Category) {
+    @Param('category') category: Category,
+  ) {
     // console.log(req.user.sub);
     console.log('chamou o cache');
-    return this.audiosService.findAll(category);
+    return this.audiosService.findAllCategory(category);
+  }
+
+  @UseInterceptors(CacheInterceptor)
+  @Get()
+  findAll() {
+    return this.audiosService.findAll();
   }
 
   @Patch()

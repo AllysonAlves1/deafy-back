@@ -8,7 +8,7 @@ import { Category } from '@prisma/client';
 @Injectable()
 export class AudiosService {
   constructor(private prisma: PrismaService) {}
-  async createAudio(
+  async createPost(
     id,
     createAudioDto: CreateAudioDto & {
       files: { audio: Express.Multer.File; image: Express.Multer.File };
@@ -16,34 +16,11 @@ export class AudiosService {
   ) {
     const userExist =
       (await this.prisma.users.count({
-        where: { id },
-      })) !== 0;
-
-    if (!userExist) {
-      throw new InvalidRelationError('User not found');
-    }
-
-    return await this.prisma.audios.create({
-      data: {
-        authorId: id,
-        title: createAudioDto.title,
-        audio: createAudioDto.files.audio[0].path,
-        image: createAudioDto.files.image[0].path,
-      },
-    });
-  }
-
-  async createPost(
-    id,
-    createAudioDto: CreateAudioDto & { file: Express.Multer.File },
-  ) {
-    const userExist =
-      (await this.prisma.users.count({
         where: { id, role: 'ADMIN' },
       })) !== 0;
 
     if (!userExist) {
-      throw new UnauthorizedException('User not found or not permitted');
+      throw new InvalidRelationError('User not found or not permitted');
     }
 
     return await this.prisma.audios.create({
@@ -51,15 +28,49 @@ export class AudiosService {
         authorId: id,
         title: createAudioDto.title,
         category: createAudioDto.category,
+        audio: createAudioDto.files.audio[0].path,
+        image: createAudioDto.files.image[0].path,
+      },
+    });
+  }
+
+  async createAudio(
+    id,
+    createAudioDto: CreateAudioDto & { file: Express.Multer.File },
+  ) {
+    const userExist =
+      (await this.prisma.users.count({
+        where: { id },
+      })) !== 0;
+
+    if (!userExist) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    return await this.prisma.audios.create({
+      data: {
+        authorId: id,
+        title: createAudioDto.title,
         audio: createAudioDto.file.path,
       },
     });
   }
 
-  async findAll(category: Category) {
+  async findAll() {
+    return await this.prisma.audios.findMany({
+      include: {
+        author: true,
+      },
+    });
+  }
+
+  async findAllCategory(category: Category) {
     return await this.prisma.audios.findMany({
       where: {
         category: category,
+      },
+      include: {
+        author: true,
       },
     });
   }
