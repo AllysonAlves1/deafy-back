@@ -28,13 +28,18 @@ import { AudioFileValidator } from './audio-file-validator';
 import { Category } from '@prisma/client';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { AuthGuard } from '../auth/auth.guard';
+import { AzureStorageService } from './azure.service';
 
 @ApiTags('Audios')
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
+//BARREIRAS DE LOGIN
 @Controller('audios')
 export class AudiosController {
-  constructor(private readonly audiosService: AudiosService) {}
+  constructor(
+    private readonly audiosService: AudiosService,
+    private readonly azureStorageService: AzureStorageService,
+  ) {}
 
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -109,5 +114,11 @@ export class AudiosController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.audiosService.remove(+id);
+  }
+
+  @Post('teste')
+  @UseInterceptors(FileInterceptor('audio'))
+  async uploadAudio(@UploadedFile() file) {
+    return await this.azureStorageService.uploadToAzureBlob(file);
   }
 }
