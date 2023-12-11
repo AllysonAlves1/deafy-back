@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Category } from '@prisma/client';
 
 export class CreateAudioDto {
-  @ApiProperty()
+  @ApiProperty({ required: false })
   title: string;
   @ApiProperty({ required: false })
   subtitle: string;

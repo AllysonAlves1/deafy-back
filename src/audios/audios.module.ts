@@ -3,16 +3,10 @@ import { AudiosService } from './audios.service';
 import { AudiosController } from './audios.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import multer from 'multer';
-import path from 'path';
+import { AzureStorageService } from '../azure/azure.service';
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'upload/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + Math.random() + path.extname(file.originalname));
-  },
-});
+const storage = multer.memoryStorage();
+
 @Module({
   imports: [
     MulterModule.register({
@@ -20,6 +14,6 @@ const storage = multer.diskStorage({
     }),
   ],
   controllers: [AudiosController],
-  providers: [AudiosService],
+  providers: [AudiosService, AzureStorageService],
 })
 export class AudiosModule {}

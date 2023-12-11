@@ -28,13 +28,17 @@ import { AudioFileValidator } from './audio-file-validator';
 import { Category } from '@prisma/client';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { AuthGuard } from '../auth/auth.guard';
+import { AzureStorageService } from '../azure/azure.service';
 
 @ApiTags('Audios')
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
 @Controller('audios')
 export class AudiosController {
-  constructor(private readonly audiosService: AudiosService) {}
+  constructor(
+    private readonly audiosService: AudiosService,
+    private readonly azureStorageService: AzureStorageService,
+  ) {}
 
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -47,15 +51,28 @@ export class AudiosController {
       { name: 'image', maxCount: 1 },
     ]),
   )
-  createAudio(
+  async createAudio(
     @Req() req,
     @Body() createAudioDto: CreateAudioDto,
     @UploadedFiles()
     files: { audio: Express.Multer.File; image: Express.Multer.File },
   ) {
-    console.log(files);
     const id = req.user.sub;
-    return this.audiosService.createPost(+id, { ...createAudioDto, files });
+    const audio = await this.azureStorageService.uploadToAzureBlob(
+      files.audio[0],
+      'musicas',
+    );
+
+    const image = await this.azureStorageService.uploadToAzureBlob(
+      files.image[0],
+      'imagens',
+    );
+
+    return this.audiosService.createPost(+id, {
+      ...createAudioDto,
+      audioUrl: audio.blobUrl,
+      imageUrl: image.blobUrl,
+    });
   }
 
   @ApiConsumes('multipart/form-data')
@@ -84,21 +101,26 @@ export class AudiosController {
     return this.audiosService.createAudio(+id, { ...createAudioDto, file });
   }
 
-  @UseInterceptors(CacheInterceptor)
-  @Get(':category')
-  findAllCategory(
-    // @Req() req,
-    @Param('category') category: Category,
-  ) {
-    // console.log(req.user.sub);
-    console.log('chamou o cache');
-    return this.audiosService.findAllCategory(category);
-  }
+  // @UseInterceptors(CacheInterceptor)
+  // @Get(':category')
+  // findAllCategory(
+  //   // @Req() req,
+  //   @Param('category') category: Category,
+  // ) {
+  //   // console.log(req.user.sub);
+  //   console.log('chamou o cache');
+  //   return this.audiosService.findAllCategory(category);
+  // }
 
   @UseInterceptors(CacheInterceptor)
   @Get()
   findAll() {
     return this.audiosService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.audiosService.findOne(+id);
   }
 
   @Patch()

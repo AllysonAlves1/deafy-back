@@ -11,7 +11,8 @@ export class AudiosService {
   async createPost(
     id,
     createAudioDto: CreateAudioDto & {
-      files: { audio: Express.Multer.File; image: Express.Multer.File };
+      audioUrl;
+      imageUrl;
     },
   ) {
     const userExist =
@@ -28,8 +29,8 @@ export class AudiosService {
         authorId: id,
         title: createAudioDto.title,
         category: createAudioDto.category,
-        audio: createAudioDto.files.audio[0].path,
-        image: createAudioDto.files.image[0].path,
+        audio: createAudioDto.audioUrl,
+        image: createAudioDto.imageUrl,
       },
     });
   }
@@ -78,6 +79,13 @@ export class AudiosService {
   async findOne(id: number) {
     return await this.prisma.audios.findUnique({
       where: { id },
+      include: {
+        author: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
   }
 
