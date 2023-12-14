@@ -24,7 +24,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Deafy')
-    .setDescription('API Deafy')
+    .setDescription('Documentação da API do Deafy')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

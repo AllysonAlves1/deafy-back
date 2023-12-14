@@ -6,7 +6,10 @@ export class CreateAudioDto {
   title: string;
   @ApiProperty({ required: false })
   subtitle: string;
-  @ApiProperty({ required: false, enum: ['MUSIC', 'PODCAST', 'AUDIOBOOK'] })
+  @ApiProperty({
+    required: false,
+    enum: ['AUDIO', 'MUSIC', 'PODCAST', 'AUDIOBOOK'],
+  })
   category: Category;
   // @IsInt()
   // @Type(() => Number)

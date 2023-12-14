@@ -13,9 +13,13 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { HashPasswordPipe } from '../pipes/hash-password.pipe';
 import { ListUserDTO } from './dto/list-user.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '../auth/auth.guard';
 
 @ApiTags('Users')
+@ApiResponse({ status: 400, description: 'Bad Request' })
+@ApiResponse({ status: 401, description: 'Unauthorized' })
+@ApiResponse({ status: 500, description: 'Internal Server Error' })
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -41,21 +45,30 @@ export class UsersController {
     };
   }
 
+  @ApiOperation({ summary: 'Buscar todos os usuários' })
   @Get()
   findAll() {
     return this.usersService.findAll();
   }
 
+  @ApiOperation({ summary: 'Buscar um usuário' })
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
 
+  @ApiBody({
+    type: CreateUserDto,
+  })
+  @ApiOperation({ summary: 'Atualizar um usuário' })
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.updateUser(+id, updateUserDto);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Deletar um usuário' })
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.removeUser(+id);

@@ -37,7 +37,7 @@ export class AudiosService {
 
   async createAudio(
     id,
-    createAudioDto: CreateAudioDto & { file: Express.Multer.File },
+    createAudioDto: CreateAudioDto & { audioUrl },
   ) {
     const userExist =
       (await this.prisma.users.count({
@@ -52,7 +52,7 @@ export class AudiosService {
       data: {
         authorId: id,
         title: createAudioDto.title,
-        audio: createAudioDto.file.path,
+        audio: createAudioDto.audioUrl,
       },
     });
   }
@@ -60,7 +60,11 @@ export class AudiosService {
   async findAll() {
     return await this.prisma.audios.findMany({
       include: {
-        author: true,
+        author: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
   }
@@ -71,7 +75,11 @@ export class AudiosService {
         category: category,
       },
       include: {
-        author: true,
+        author: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
   }

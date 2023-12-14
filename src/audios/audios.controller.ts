@@ -23,7 +23,14 @@ import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AudioFileValidator } from './audio-file-validator';
 import { Category } from '@prisma/client';
 import { CacheInterceptor } from '@nestjs/cache-manager';
@@ -32,6 +39,10 @@ import { AzureStorageService } from '../azure/azure.service';
 
 @ApiTags('Audios')
 @ApiBearerAuth()
+@ApiResponse({ status: 400, description: 'Bad Request' })
+@ApiResponse({ status: 401, description: 'Unauthorized' })
+@ApiResponse({ status: 404, description: 'Forbidden' })
+@ApiResponse({ status: 500, description: 'Internal Server Error' })
 @UseGuards(AuthGuard)
 @Controller('audios')
 export class AudiosController {
@@ -44,6 +55,7 @@ export class AudiosController {
   @ApiBody({
     type: CreateAudioWithUploadDto,
   })
+  @ApiOperation({ summary: 'Requisição com áudio e imagem' })
   @Post('posts/upload')
   @UseInterceptors(
     FileFieldsInterceptor([
@@ -75,13 +87,18 @@ export class AudiosController {
     });
   }
 
+  @ApiResponse({
+    status: 422,
+    description: 'Unprocessable Entity',
+  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     type: CreateAudioWithUploadDto,
   })
+  @ApiOperation({ summary: 'Requisição só para áudio' })
   @Post('upload')
   @UseInterceptors(FileInterceptor('audio'))
-  createPost(
+  async createPost(
     @Req() req,
     @Body() createAudioDto: CreateAudioDto,
     @UploadedFile(
@@ -89,7 +106,7 @@ export class AudiosController {
         validators: [
           new AudioFileValidator({
             maxSize: 1024 * 1024 * 100,
-            mimeType: 'audio/mpeg',
+            mimeType: 'audio/wav',
           }),
         ],
         errorHttpStatusCode: 422,
@@ -98,36 +115,44 @@ export class AudiosController {
     file: Express.Multer.File,
   ) {
     const id = req.user.sub;
-    return this.audiosService.createAudio(+id, { ...createAudioDto, file });
+    const audio = await this.azureStorageService.uploadToAzureBlob(
+      file,
+      'musicas',
+    );
+    return this.audiosService.createAudio(+id, { ...createAudioDto, audioUrl: audio.blobUrl });
   }
 
-  // @UseInterceptors(CacheInterceptor)
-  // @Get(':category')
-  // findAllCategory(
-  //   // @Req() req,
-  //   @Param('category') category: Category,
-  // ) {
-  //   // console.log(req.user.sub);
-  //   console.log('chamou o cache');
-  //   return this.audiosService.findAllCategory(category);
-  // }
+  @UseInterceptors(CacheInterceptor)
+  @ApiOperation({ summary: 'Buscar todos os áudios de uma categoria' })
+  @Get('category/:category')
+  findAllCategory(
+    @Param('category') category: Category,
+  ) {
+    return this.audiosService.findAllCategory(category);
+  }
 
   @UseInterceptors(CacheInterceptor)
+  @ApiOperation({ summary: 'Buscar todos os áudios' })
   @Get()
   findAll() {
     return this.audiosService.findAll();
   }
 
+  @ApiOperation({ summary: 'Buscar um áudio' })
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.audiosService.findOne(+id);
   }
-
-  @Patch()
+  @ApiBody({
+    type: CreateAudioDto,
+  })
+  @ApiOperation({ summary: 'Atualizar um áudio' })
+  @Patch(':id')
   update(@Param('id') id: string, @Body() updateAudioDto: UpdateAudioDto) {
     return this.audiosService.update(+id, updateAudioDto);
   }
 
+  @ApiOperation({ summary: 'Deletar um áudio' })
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.audiosService.remove(+id);
