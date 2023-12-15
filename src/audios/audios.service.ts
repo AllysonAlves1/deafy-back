@@ -35,10 +35,7 @@ export class AudiosService {
     });
   }
 
-  async createAudio(
-    id,
-    createAudioDto: CreateAudioDto & { audioUrl },
-  ) {
+  async createAudio(id, createAudioDto: CreateAudioDto & { audioUrl }) {
     const userExist =
       (await this.prisma.users.count({
         where: { id },
@@ -59,6 +56,11 @@ export class AudiosService {
 
   async findAll() {
     return await this.prisma.audios.findMany({
+      where: {
+        category: {
+          in: ['MUSIC', 'PODCAST', 'AUDIOBOOK'],
+        },
+      },
       include: {
         author: {
           select: {

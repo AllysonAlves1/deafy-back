@@ -119,20 +119,21 @@ export class AudiosController {
       file,
       'musicas',
     );
-    return this.audiosService.createAudio(+id, { ...createAudioDto, audioUrl: audio.blobUrl });
+    return this.audiosService.createAudio(+id, {
+      ...createAudioDto,
+      audioUrl: audio.blobUrl,
+    });
   }
 
   @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Buscar todos os áudios de uma categoria' })
   @Get('category/:category')
-  findAllCategory(
-    @Param('category') category: Category,
-  ) {
+  findAllCategory(@Param('category') category: Category) {
     return this.audiosService.findAllCategory(category);
   }
 
   @UseInterceptors(CacheInterceptor)
-  @ApiOperation({ summary: 'Buscar todos os áudios' })
+  @ApiOperation({ summary: 'Buscar todas as categorias, exceto a de AUDIO' })
   @Get()
   findAll() {
     return this.audiosService.findAll();

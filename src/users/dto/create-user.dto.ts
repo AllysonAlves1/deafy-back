@@ -10,19 +10,19 @@ import {
 } from 'class-validator';
 
 export class CreateUserDto {
-  @ApiProperty()
-  @IsNotEmpty()
-  @MaxLength(255)
-  @IsString()
-  @MinLength(3)
+  @ApiProperty({ required: false })
   name: string;
-  @IsEmail()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   email: string;
-  @ApiProperty()
+  @ApiProperty({ required: false })
   password: string;
   @IsOptional()
   image?: string;
-  @ApiProperty({ enum: Role })
+  @ApiProperty({ required: false, enum: Role })
   role: Role;
+}
+
+export class UpdateUserWithUploadDto extends CreateUserDto {
+  @ApiProperty({ required: false, type: 'string', format: 'binary' })
+  image: string;
 }

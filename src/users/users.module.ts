@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { ConfigModule } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
+import { AzureStorageService } from '../azure/azure.service';
 
 @Module({
   imports: [ConfigModule],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, AzureStorageService],
 })
 export class UsersModule {}

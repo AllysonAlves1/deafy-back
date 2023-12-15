@@ -29,6 +29,11 @@ export class UsersService {
   async findOne(id: number) {
     return await this.prisma.users.findUniqueOrThrow({
       where: { id },
+      include: {
+        audios: {
+          where: { category: 'AUDIO' },
+        },
+      },
     });
   }
 
@@ -38,10 +43,13 @@ export class UsersService {
     });
   }
 
-  async updateUser(id: number, updateUserDto: UpdateUserDto) {
+  async updateUser(id: number, updateUserDto: UpdateUserDto & { image }) {
     return await this.prisma.users.update({
       where: { id },
-      data: updateUserDto,
+      data: {
+        name: updateUserDto.name,
+        image: updateUserDto.image,
+      },
     });
   }
 

@@ -7,14 +7,25 @@ import {
   Param,
   Delete,
   UseGuards,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, UpdateUserWithUploadDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { HashPasswordPipe } from '../pipes/hash-password.pipe';
 import { ListUserDTO } from './dto/list-user.dto';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
+import { AzureStorageService } from '../azure/azure.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Users')
 @ApiResponse({ status: 400, description: 'Bad Request' })
@@ -22,7 +33,10 @@ import { AuthGuard } from '../auth/auth.guard';
 @ApiResponse({ status: 500, description: 'Internal Server Error' })
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly azureStorageService: AzureStorageService,
+  ) {}
 
   @ApiOperation({ summary: 'Criar um usuário' })
   @Post()
@@ -51,19 +65,33 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @ApiOperation({ summary: 'Buscar um usuário' })
+  @ApiOperation({ summary: 'Buscar um usuário e todos seus áudios' })
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
 
   @ApiBody({
-    type: CreateUserDto,
+    type: UpdateUserWithUploadDto,
   })
   @ApiOperation({ summary: 'Atualizar um usuário' })
+  @ApiConsumes('multipart/form-data')
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.updateUser(+id, updateUserDto);
+  @UseInterceptors(FileInterceptor('image'))
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile()
+    file: Express.Multer.File,
+  ) {
+    const image = await this.azureStorageService.uploadToAzureBlob(
+      file,
+      'imagens',
+    );
+    return this.usersService.updateUser(+id, {
+      ...updateUserDto,
+      image: image.blobUrl,
+    });
   }
 
   @ApiBearerAuth()
