@@ -14,10 +14,10 @@ CREATE TABLE `Users` (
 -- CreateTable
 CREATE TABLE `Audios` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `title` VARCHAR(191) NULL,
-    `subtitle` VARCHAR(191) NULL,
-    `image` VARCHAR(191) NULL,
-    `audio` VARCHAR(191) NOT NULL,
+    `title` VARCHAR(255) NOT NULL,
+    `subtitle` TEXT NULL,
+    `image` VARCHAR(255) NULL,
+    `audio` VARCHAR(255) NOT NULL,
     `category` ENUM('AUDIO', 'MUSIC', 'PODCAST', 'AUDIOBOOK') NOT NULL DEFAULT 'AUDIO',
     `authorId` INTEGER NOT NULL,
 

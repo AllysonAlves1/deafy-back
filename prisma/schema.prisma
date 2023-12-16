@@ -24,14 +24,15 @@ model Users {
   role     Role     @default(USER)
   audios   Audios[]
 }
+
 model Audios {
-  id       Int     @id @default(autoincrement())
-  title    String?
-  subtitle String?
-  image    String?
-  audio    String
+  id       Int      @id @default(autoincrement())
+  title    String   @db.VarChar(255)
+  subtitle String? @db.Text
+  image    String? @db.VarChar(255)
+  audio    String @db.VarChar(255)
   category Category @default(AUDIO)
-  author   Users @relation(fields: [authorId], references: [id])
+  author   Users    @relation(fields: [authorId], references: [id])
   authorId Int
 }
 
