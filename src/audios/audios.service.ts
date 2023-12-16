@@ -50,6 +50,7 @@ export class AudiosService {
         authorId: id,
         title: createAudioDto.title,
         audio: createAudioDto.audioUrl,
+        subtitle: createAudioDto.subtitle,
       },
     });
   }
