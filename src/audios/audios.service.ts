@@ -100,7 +100,17 @@ export class AudiosService {
     });
   }
 
-  async update(id: number, updateAudioDto: UpdateAudioDto) {
+  async update(id: number, idUser: number, updateAudioDto: UpdateAudioDto) {
+    const audioToUpdate = await this.prisma.audios.findUnique({
+      where: { id },
+      select: { authorId: true },
+    });
+
+    if (!audioToUpdate || audioToUpdate.authorId !== idUser) {
+      throw new UnauthorizedException(
+        'User not authorized to update this audio',
+      );
+    }
     return await this.prisma.audios.update({
       where: { id },
       data: updateAudioDto,

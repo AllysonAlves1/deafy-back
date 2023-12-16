@@ -149,8 +149,13 @@ export class AudiosController {
   })
   @ApiOperation({ summary: 'Atualizar um áudio' })
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAudioDto: UpdateAudioDto) {
-    return this.audiosService.update(+id, updateAudioDto);
+  update(
+    @Req() req,
+    @Param('id') id: string,
+    @Body() updateAudioDto: UpdateAudioDto,
+  ) {
+    const idUser = req.user.sub;
+    return this.audiosService.update(+id, idUser, updateAudioDto);
   }
 
   @ApiOperation({ summary: 'Deletar um áudio' })
